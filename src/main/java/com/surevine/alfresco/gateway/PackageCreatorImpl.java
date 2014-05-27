@@ -1,7 +1,9 @@
 package com.surevine.alfresco.gateway;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.io.FileUtils;
 
 public class PackageCreatorImpl implements PackageCreator {
 	
@@ -88,6 +91,24 @@ public class PackageCreatorImpl implements PackageCreator {
 			}
 		}
 		return rV;
+	}
+
+	@Override
+	public void postPackage(GatewayPackage thePackage, File destination) {
+		File packageFile = thePackage.getPackageFile();
+		File destinationFile=destination;
+		if (!destinationFile.exists()) {
+			destinationFile.mkdirs();
+		}
+		try {
+			FileUtils.copyFileToDirectory(packageFile, destinationFile);
+		}
+		catch (IOException e) {
+			throw new GatewayException("Could not copy file to destination: "+destinationFile, e);
+		}
+		finally {
+			thePackage.deleteFiles();
+		}
 	}
 
 }
