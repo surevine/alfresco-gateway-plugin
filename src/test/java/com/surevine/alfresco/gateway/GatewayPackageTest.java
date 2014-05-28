@@ -147,8 +147,6 @@ public class GatewayPackageTest {
 		File toExamine = new File(extractedDir.toString()+"/_contents/content");
 
 		Runtime.getRuntime().exec(new String[] { 	"tar", 
-													"--include",
-													"_contents/content",
 													"-C",
 													extractedDir.toString(),
 													"-xzf",
@@ -183,8 +181,6 @@ public class GatewayPackageTest {
 		extractedDir.mkdir();
 		File toExamine = new File(extractedDir.toString()+"/.metadata.json");
 		Runtime.getRuntime().exec(new String[] { 	"tar", 
-													"--include",
-													".metadata.json",
 													"-C",
 													extractedDir.toString(),
 													"-xzf",
@@ -220,10 +216,7 @@ public class GatewayPackageTest {
 			Assert.fail("The directory could not be created: "+extractedDir.getAbsolutePath());
 		}
 		File toExamine = new File(extractedDir.toString()+"/_contents/alfresco_metadata");
-		System.out.println("**********     "+extractedDir.getAbsolutePath());
 		Runtime.getRuntime().exec(new String[] { 	"tar", 
-													"--include",
-													"_contents/alfresco_metadata",
 													"-C",
 													extractedDir.toString(),
 													"-xzf",
