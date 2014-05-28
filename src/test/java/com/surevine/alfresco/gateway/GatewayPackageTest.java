@@ -245,7 +245,7 @@ public class GatewayPackageTest {
 	}
 	
 	@AfterClass
-	public void shutdown() {
+	public static void shutdown() {
 		OUTPUT_DIR.delete();
 	}
 }
