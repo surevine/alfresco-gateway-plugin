@@ -13,6 +13,7 @@ import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.namespace.QName;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -243,4 +244,8 @@ public class GatewayPackageTest {
 		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(), "{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}");
 	}
 	
+	@AfterClass
+	public void shutdown() {
+		OUTPUT_DIR.delete();
+	}
 }
