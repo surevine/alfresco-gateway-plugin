@@ -216,7 +216,9 @@ public class GatewayPackageTest {
 		GatewayPackage gp = new GatewayPackage(tempDir, cr, getTestProperties());
 		gp.writeToDisk();
 		File extractedDir=new File(gp.getPackageFile().getParentFile(), "extracted");
-		extractedDir.mkdir();
+		if (!extractedDir.mkdir()) {
+			Assert.fail("The directory could not be created: "+extractedDir.getAbsolutePath());
+		}
 		File toExamine = new File(extractedDir.toString()+"/_contents/alfresco_metadata");
 		
 		Runtime.getRuntime().exec(new String[] { 	"tar", 
