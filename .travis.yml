@@ -1,3 +1,6 @@
 language: java
 
-script: tar --help
+script: 
+
+echo foo > bar
+tar -cvf baz bar
