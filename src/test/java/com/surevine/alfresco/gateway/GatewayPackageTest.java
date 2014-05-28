@@ -6,16 +6,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.surevine.alfresco.gateway.mock.MockSimpleStringContentReader;
@@ -30,8 +33,8 @@ public class GatewayPackageTest {
 		}
 	}
 	
-	@Before
-	public void init() {
+	@BeforeClass
+	public static void init() {
 		if (!(OUTPUT_DIR.exists() || OUTPUT_DIR.mkdirs())) {
 			throw new RuntimeException("Couldn't instaniate output directory: "+OUTPUT_DIR);
 		}
@@ -179,7 +182,6 @@ public class GatewayPackageTest {
 		File extractedDir=new File(gp.getPackageFile().getParentFile(), "extracted");
 		extractedDir.mkdir();
 		File toExamine = new File(extractedDir.toString()+"/.metadata.json");
-		
 		Runtime.getRuntime().exec(new String[] { 	"tar", 
 													"--include",
 													".metadata.json",
@@ -226,7 +228,7 @@ public class GatewayPackageTest {
 													gp.getPackageFile().toString()
 												}, new String[] {}, tempDir).waitFor();
 		
-		Assert.assertTrue("Metadata file "+toExamine+" does not exist", toExamine.exists());
+		Assert.assertTrue("Metadata file "+toExamine+" does not exist:\n"+writeDirectory(tempDir), toExamine.exists());
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(toExamine)));
 		String metaDataContent="";
 		while (true) { //I know this is horrible, but it'll do for a unit test
@@ -247,5 +249,15 @@ public class GatewayPackageTest {
 	@AfterClass
 	public static void shutdown() {
 		OUTPUT_DIR.delete();
+	}
+	
+	@SuppressWarnings("unchecked") //to force FileUtils into generics
+	private String writeDirectory(File file) {
+		StringBuilder sb = new StringBuilder(200);
+		Collection<File> i = FileUtils.listFiles(file, null, true);
+		for (File f : i) {
+			sb.append("   ").append(f.getAbsolutePath()).append('\n');
+		}
+		return sb.toString();
 	}
 }
