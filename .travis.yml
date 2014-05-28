@@ -1,6 +1,1 @@
 language: java
-
-script: 
-
-echo foo > bar
-tar -cvf baz bar
