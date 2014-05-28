@@ -212,7 +212,7 @@ public class GatewayPackageTest {
 	@Test
 	public void checkAlfrescoMetadataFromGzip() throws IOException, InterruptedException {
 		ContentReader cr = new MockSimpleStringContentReader("Alas, poor Yorrick, I knew him well");
-		File tempDir = createTempDir("checkGatewayMetadataFromGzip");
+		File tempDir = createTempDir("checkAlfrescoMetadataFromGzip");
 		GatewayPackage gp = new GatewayPackage(tempDir, cr, getTestProperties());
 		gp.writeToDisk();
 		File extractedDir=new File(gp.getPackageFile().getParentFile(), "extracted");
