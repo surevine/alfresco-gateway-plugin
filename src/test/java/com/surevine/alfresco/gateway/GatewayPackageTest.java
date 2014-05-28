@@ -220,7 +220,7 @@ public class GatewayPackageTest {
 			Assert.fail("The directory could not be created: "+extractedDir.getAbsolutePath());
 		}
 		File toExamine = new File(extractedDir.toString()+"/_contents/alfresco_metadata");
-		
+		System.out.println("**********     "+extractedDir.getAbsolutePath());
 		Runtime.getRuntime().exec(new String[] { 	"tar", 
 													"--include",
 													"_contents/alfresco_metadata",
