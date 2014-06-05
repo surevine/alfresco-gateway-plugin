@@ -80,10 +80,7 @@ public class GatewayPackageTest {
 				break;
 			}
 			metaDataContent+=line;
-		}
-		System.out.println(metaDataContent.trim());
-		
-
+		}		
 		
 		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(),
 				"{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"SOURCE_TYPE\":\"ALFRESCO\",\"{gateway}:NAME\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}"
@@ -188,9 +185,7 @@ public class GatewayPackageTest {
 				"-rf",
 				tempDir.toString(),
 			}, new String[] {}, tempDir).waitFor();
-		
-		System.out.println(metaDataContent.trim());
-																							
+																									
 		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(), "{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"SOURCE_TYPE\":\"ALFRESCO\",\"{gateway}:NAME\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}");
 		//gp.deleteFiles();
 	}
