@@ -199,14 +199,4 @@ public class GatewayPackageTest {
 	public static void shutdown() {
 		OUTPUT_DIR.delete();
 	}
-	
-	@SuppressWarnings("unchecked") //to force FileUtils into generics
-	private String writeDirectory(File file) {
-		StringBuilder sb = new StringBuilder(200);
-		Collection<File> i = FileUtils.listFiles(file, null, true);
-		for (File f : i) {
-			sb.append("   ").append(f.getAbsolutePath()).append('\n');
-		}
-		return sb.toString();
-	}
 }
