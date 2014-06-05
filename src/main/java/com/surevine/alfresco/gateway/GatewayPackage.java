@@ -115,7 +115,7 @@ public class GatewayPackage {
 		JSONObject json = new JSONObject();
 
 		// TODO: Extract security properties from ICONIC schema
-		json.put("SOURCE_TYPE", "ALFRESCO");
+		json.put("source_type", "ALFRESCO");
 		json.put("PATH", _propertiesToExport.get(QName.createQName(PATH_KEY)));
 		for (QName qName : _propertiesToExport.keySet()) {
 			json.put(qName.toString(), _propertiesToExport.get(qName));

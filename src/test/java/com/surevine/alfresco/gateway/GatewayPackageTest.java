@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +13,6 @@ import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.namespace.QName;
-import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -116,7 +114,7 @@ public class GatewayPackageTest {
 			metaDataContent+=line;
 		}
 		Assert.assertEquals("Contents of content file incorrect", metaDataContent.trim(), "Alas, poor Yorrick, I knew him well");
-		//gp.deleteFiles();
+		gp.deleteFiles();
 	}
 	
 	@Test
@@ -187,7 +185,7 @@ public class GatewayPackageTest {
 			}, new String[] {}, tempDir).waitFor();
 																									
 		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(), "{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"SOURCE_TYPE\":\"ALFRESCO\",\"{gateway}:NAME\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}");
-		//gp.deleteFiles();
+		gp.deleteFiles();
 	}
 	
 	@AfterClass
