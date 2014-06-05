@@ -74,6 +74,7 @@ public class PackageCreatorImpl implements PackageCreator {
 		String pathString = _nodeService.getPath(nr).toDisplayPath(_nodeService, _permissionService);
 		Map<QName, Serializable> props = getPropertiesToExport(nr);
 		props.put(QName.createQName(GatewayPackage.PATH_KEY), pathString); 		//Always include the path under the special key {gateway}:PATH
+		props.put(QName.createQName(GatewayPackage.NAME_KEY), _nodeService.getProperty(nr, ContentModel.PROP_NAME));
 		return new GatewayPackage(_workingDir, cr, props);
 	}
 	

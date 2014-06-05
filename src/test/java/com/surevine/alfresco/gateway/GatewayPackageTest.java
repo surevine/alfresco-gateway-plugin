@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Iterator;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.ContentReader;
@@ -52,6 +51,8 @@ public class GatewayPackageTest {
 		rV.put(ContentModel.PROP_DESCRIPTION, "My Test Description");
 		rV.put(ContentModel.PROP_TITLE, "My Test Title");
 		rV.put(QName.createQName(GatewayPackage.PATH_KEY), "My Test Path");
+		rV.put(QName.createQName(GatewayPackage.NAME_KEY), "My Test Name");
+
 		return rV;
 	}
 	
@@ -80,7 +81,13 @@ public class GatewayPackageTest {
 			}
 			metaDataContent+=line;
 		}
-		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(), "{\"SOURCE_TYPE\":\"ALFRESCO\",\"PATH\":\"My Test Path\"}");
+		System.out.println(metaDataContent.trim());
+		
+
+		
+		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(),
+				"{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"SOURCE_TYPE\":\"ALFRESCO\",\"{gateway}:NAME\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}"
+		);
 		gp.deleteFiles();
 	}
 	
@@ -95,33 +102,12 @@ public class GatewayPackageTest {
 	}
 	
 	@Test
-	public void checkAlfrescoMetadata() throws IOException {
-		ContentReader cr = new MockSimpleStringContentReader("Alas, poor Yorrick, I knew him well");
-		File tempDir = createTempDir("checkAlfrescoMetadata");
-		GatewayPackage gp = new GatewayPackage(tempDir, cr, getTestProperties());
-		gp.writeToDisk();
-		File metadataFile = new File(gp.getPackageFile().getParent()+"/_contents", "alfresco_metadata");
-		Assert.assertTrue("Metadata file "+metadataFile+" does not exist", metadataFile.exists());
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(metadataFile)));
-		String metaDataContent="";
-		while (true) { //I know this is horrible, but it'll do for a unit test
-			String line = br.readLine();
-			if (line==null) {
-				break;
-			}
-			metaDataContent+=line;
-		}
-		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(), "{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}");
-		gp.deleteFiles();
-	}
-	
-	@Test
 	public void checkContent() throws IOException {
 		ContentReader cr = new MockSimpleStringContentReader("Alas, poor Yorrick, I knew him well");
-		File tempDir = createTempDir("checkAlfrescoMetadata");
+		File tempDir = createTempDir("checkContent");
 		GatewayPackage gp = new GatewayPackage(tempDir, cr, getTestProperties());
 		gp.writeToDisk();
-		File metadataFile = new File(gp.getPackageFile().getParent()+"/_contents", "content");
+		File metadataFile = new File(gp.getPackageFile().getParent(), "My Test Name");
 		Assert.assertTrue("Metadata file "+metadataFile+" does not exist", metadataFile.exists());
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(metadataFile)));
 		String metaDataContent="";
@@ -133,7 +119,7 @@ public class GatewayPackageTest {
 			metaDataContent+=line;
 		}
 		Assert.assertEquals("Contents of content file incorrect", metaDataContent.trim(), "Alas, poor Yorrick, I knew him well");
-		gp.deleteFiles();
+		//gp.deleteFiles();
 	}
 	
 	@Test
@@ -144,7 +130,7 @@ public class GatewayPackageTest {
 		gp.writeToDisk();
 		File extractedDir=new File(gp.getPackageFile().getParentFile(), "extracted");
 		extractedDir.mkdir();
-		File toExamine = new File(extractedDir.toString()+"/_contents/content");
+		File toExamine = new File(extractedDir.toString()+"/My Test Name");
 
 		Runtime.getRuntime().exec(new String[] { 	"tar", 
 													"-C",
@@ -169,6 +155,7 @@ public class GatewayPackageTest {
 			}, new String[] {}, tempDir).waitFor();
 		
 		Assert.assertEquals("Contents of content file incorrect", metaDataContent.trim(), "Alas, poor Yorrick, I knew him well");
+		gp.deleteFiles();
 	}
 	
 	@Test
@@ -202,43 +189,10 @@ public class GatewayPackageTest {
 				tempDir.toString(),
 			}, new String[] {}, tempDir).waitFor();
 		
-		Assert.assertEquals("Contents of content file incorrect", metaDataContent.trim(), "{\"SOURCE_TYPE\":\"ALFRESCO\",\"PATH\":\"My Test Path\"}");
-	}
-
-	@Test
-	public void checkAlfrescoMetadataFromGzip() throws IOException, InterruptedException {
-		ContentReader cr = new MockSimpleStringContentReader("Alas, poor Yorrick, I knew him well");
-		File tempDir = createTempDir("checkAlfrescoMetadataFromGzip");
-		GatewayPackage gp = new GatewayPackage(tempDir, cr, getTestProperties());
-		gp.writeToDisk();
-		File extractedDir=new File(gp.getPackageFile().getParentFile(), "extracted");
-		if (!extractedDir.mkdir()) {
-			Assert.fail("The directory could not be created: "+extractedDir.getAbsolutePath());
-		}
-		File toExamine = new File(extractedDir.toString()+"/_contents/alfresco_metadata");
-		Runtime.getRuntime().exec(new String[] { 	"tar", 
-													"-C",
-													extractedDir.toString(),
-													"-xzf",
-													gp.getPackageFile().toString()
-												}, new String[] {}, tempDir).waitFor();
-		
-		Assert.assertTrue("Metadata file "+toExamine+" does not exist:\n"+writeDirectory(tempDir), toExamine.exists());
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(toExamine)));
-		String metaDataContent="";
-		while (true) { //I know this is horrible, but it'll do for a unit test
-			String line = br.readLine();
-			if (line==null) {
-				break;
-			}
-			metaDataContent+=line;
-		}
-		Runtime.getRuntime().exec(new String[] { 	"rm", 
-				"-rf",
-				tempDir.toString(),
-			}, new String[] {}, tempDir).waitFor();
-		
-		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(), "{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}");
+		System.out.println(metaDataContent.trim());
+																							
+		Assert.assertEquals("Contents of metadata file incorrect", metaDataContent.trim(), "{\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}name\":\"My Test Name\",\"SOURCE_TYPE\":\"ALFRESCO\",\"{gateway}:NAME\":\"My Test Name\",\"{gateway}:PATH\":\"My Test Path\",\"PATH\":\"My Test Path\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}title\":\"My Test Title\",\"{http:\\/\\/www.alfresco.org\\/model\\/content\\/1.0}description\":\"My Test Description\"}");
+		//gp.deleteFiles();
 	}
 	
 	@AfterClass

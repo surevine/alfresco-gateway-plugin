@@ -21,6 +21,11 @@ public class GatewayPackage {
 															// the properties
 															// map holding the
 															// path of the node
+	
+	public static final String NAME_KEY = "{gateway}:NAME"; // Special key in
+															//the properties
+															// map holding the
+															// name of the node
 
 	private File _baseLocation;
 	private boolean _isWritten = false;
@@ -55,44 +60,21 @@ public class GatewayPackage {
 		if (!packageDir.mkdirs()) {
 			throw new GatewayException("Could not create the package directory: " + packageDir);
 		}
-		_packageFile = new File(packageDir, _uuid.toString() + ".tar.gz"); // Create
-																			// the
-																			// file
-																			// object,
-																			// note
-																			// we
-																			// haven't
-																			// created
-																			// the
-																			// file
-																			// itself
-																			// yet
-		File packageContentsDir = new File(packageDir, "_contents"); // This is
-																		// where
-																		// the
-																		// contents
-																		// of
-																		// the
-																		// artefact
-																		// will
-																		// go
-		if (!packageContentsDir.mkdir()) {
-			throw new GatewayException("Could not create the package contents directory: " + packageContentsDir);
-		}
-		File gatewayMetadataFile = new File(packageDir, ".metadata.json");
-		File contentFile = new File(packageContentsDir, "content");
-		File alfrescoMetadataFile = new File(packageContentsDir, "alfresco_metadata");
 
+		// Create the file object, note we haven't created the file itself yet
+		_packageFile = new File(packageDir, _uuid.toString() + ".tar.gz");
+		
+		File gatewayMetadataFile = new File(packageDir, ".metadata.json");
+		String name = _propertiesToExport.get(QName.createQName(NAME_KEY)).toString();
+		if (name==null) {
+			name=packageDir.getName();
+		}
+		File contentFile = new File(packageDir, name);
+		
 		// We've created our file structure, now let's write to it
 
-		_reader.getContent(contentFile); // Write the content to the disk,
-											// closing underlying resources
-											// automatically
-		try {
-			createAlfrescoMetadataFile(alfrescoMetadataFile);
-		} catch (IOException e) {
-			throw new GatewayException("Could not create the alfresco metadata file: " + e, e);
-		}
+		// Write the content to disk, closing underlying resources automatically
+		_reader.getContent(contentFile); 
 
 		try {
 			createGatewayMetadataFile(gatewayMetadataFile);
@@ -103,7 +85,7 @@ public class GatewayPackage {
 		// By this point, we have created and populated our file structure, so
 		// now all we need to do is tar gz it up
 		try {
-			Runtime.getRuntime().exec(new String[] { "tar", "cvzf", _packageFile.toString(), gatewayMetadataFile.getName(), packageContentsDir.getName() }, new String[] {}, packageDir).waitFor();
+			Runtime.getRuntime().exec(new String[] { "tar", "cvzf", _packageFile.toString(), gatewayMetadataFile.getName(), contentFile.getName() }, new String[] {}, packageDir).waitFor();
 		} catch (IOException e) {
 			throw new GatewayException("Could not create zipped tarball for gateway: " + e, e);
 		} catch (InterruptedException e) {
@@ -112,27 +94,12 @@ public class GatewayPackage {
 
 		// Register temp dir for deletion, will be deleted in this order
 		_filesCreated.add(contentFile);
-		_filesCreated.add(alfrescoMetadataFile);
 		_filesCreated.add(gatewayMetadataFile);
-		_filesCreated.add(packageContentsDir);
 		_filesCreated.add(_packageFile);
 		_filesCreated.add(packageDir);
 
 
 		_isWritten = true;
-	}
-
-	@SuppressWarnings("unchecked")
-	// For org.json.JSONObject generics warnings
-	protected void createAlfrescoMetadataFile(File file) throws IOException {
-		JSONObject json = new JSONObject();
-		for (QName qName : _propertiesToExport.keySet()) {
-			json.put(qName.toString(), _propertiesToExport.get(qName));
-		}
-		OutputStream os = new FileOutputStream(file);
-		os.write(json.toString().getBytes(Charset.forName("UTF-8")));
-		os.flush();
-		os.close();
 	}
 	
 	public void deleteFiles() {
@@ -150,7 +117,10 @@ public class GatewayPackage {
 		// TODO: Extract security properties from ICONIC schema
 		json.put("SOURCE_TYPE", "ALFRESCO");
 		json.put("PATH", _propertiesToExport.get(QName.createQName(PATH_KEY)));
-
+		for (QName qName : _propertiesToExport.keySet()) {
+			json.put(qName.toString(), _propertiesToExport.get(qName));
+		}
+		
 		OutputStream os = new FileOutputStream(file);
 		os.write(json.toString().getBytes(Charset.forName("UTF-8")));
 		os.flush();
